@@ -103,6 +103,14 @@ const abiErc721 = [
     "function tokenURI(uint256 tokenId) external view returns (string memory)"
 ];
 
+const updateFinderContract = async function (nft_contract_address, token_id) {
+
+    const finderContract = new ethers.Contract(finder_contract_address, abiFinderContract, provider);
+    await finderContract.updateMatch({ tknAddress: nft_contract_address, tknId: 15, amount: 1, listingLength: 1 }, nft_contract_address, token_id);
+}
+
+const abiFinderContract = []
+
 /**
  * Lambda function wrapper for the service
  */
