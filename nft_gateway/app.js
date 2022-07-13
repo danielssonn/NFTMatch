@@ -2,6 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const handleURIRequest = require('./index').handleURIRequest
 const handleMatchRequest = require('./index').handleMatchRequest
+const handleNFTRegistration = require('./index').handleNFTRegistration
+
 
 
 const app = express()
@@ -15,6 +17,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
  * https://www.getpostman.com/collections/6df3296f6a359d9dac70
  */
 
+/////////////////// - target APIs - ///////////////
+
+
+/**
+ * NFT registration gateway
+ */
+app.post('/register-nft', async (req, res) => {
+    console.log('POST Data: ', req.body)
+
+    handleNFTRegistration(req.body, (status, result) => {
+        console.log('Result: ', result)
+        res.status(status).json(result)
+    })
+})
+
+/////////////////// - protyping APIs only - ///////////////
 
 /**
  * Standalone API service that calls into blockchain to retrieve token uri link

@@ -26,6 +26,20 @@ const options = {
 // NFT_PORT_MATCH = "/v0/search?"
 
 
+/**
+ * Accept and persist the NFT to be registered for matching.
+ * @param {*} input 
+ * @param {*} callback 
+ */
+const handleNFTRegistration = async (input, callback) => {
+
+    // find some good persistence provider tha will not lock us in on any given platform
+    // define persistence model that lends itself well towards eventual distributed deployment
+    // persist the NFT there ...
+    callback(200, { message: "No registration provider implemented, go do it :-)!" });
+}
+
+
 
 /**
  * Retrieve the token URI
@@ -107,3 +121,4 @@ exports.handler = (event, context, callback) => {
 // Should we want to run straight up vs. as a lambda
 module.exports.handleURIRequest = handleURIRequest
 module.exports.handleMatchRequest = handleMatchRequest
+module.exports.handleNFTRegistration = handleNFTRegistration
