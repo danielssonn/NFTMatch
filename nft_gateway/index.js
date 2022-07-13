@@ -1,0 +1,117 @@
+const ethers = require('ethers');
+const https = require('https');
+
+require('dotenv').config({ path: '../.env' })
+
+// blockchain provider config
+const providerURL = process.env.ALCHEMY_URL_MAINNET
+const provider = new ethers.providers.JsonRpcProvider(providerURL);
+
+// API provider config
+const options = {
+    hostname: process.env.NFT_PORT_URL,
+    port: 443,
+    path: process.env.NFT_PORT_MATCH,
+    method: 'GET',
+    accept: 'application/json',
+    query: { chain: 'ethereum' },
+    headers: {
+        Authorization: process.env.NFT_PORT_KEY
+    },
+};
+
+
+
+/**
+ * Retrieve the token URI
+ * @param {*} input 
+ * @param {*} callback 
+ */
+const handleURIRequest = async (input, callback) => {
+    console.log('input ', input)
+    console.log('Provider URL' + providerURL);
+    let responseCode = 200;
+
+    const token_uri = await getTokenURI(input.contract_address, input.token_id)
+    let responseBody = {
+        message: "Retrieved",
+        token_uri: token_uri
+    };
+
+
+    let response = {
+        statusCode: responseCode,
+        body: JSON.stringify(responseBody)
+    };
+    callback(responseCode, response);
+
+
+}
+/**
+ * Retrieve via API search
+ * @param {*} input 
+ * @param {*} callback 
+ */
+const handleMatchRequest = async (input, callback) => {
+
+    options.path = options.path + 'chain=ethereum&text=' + input.text + '&' + input.chain + '&filter_by_contract_address=' + input.contract_address;
+    console.log(options.path);
+    const req = https.request(options, res => {
+        console.log(`statusCode: ${res.statusCode}`);
+        let data;
+        res.on('data', d => {
+            data = data + d
+
+        });
+        res.on('end', function () {
+            callback(200, data);
+        });
+    });
+
+    req.on('error', error => {
+        console.log('ERROR', error);
+    });
+
+    req.end();
+
+
+
+}
+
+const getTokenURI = async function (nft_contract_address, token_id) {
+
+    const nftContract = new ethers.Contract(nft_contract_address, abiErc721, provider);
+    const token_uri = await nftContract.tokenURI(token_id)
+    return { token_uri: token_uri }
+}
+
+const getMatchFromAPI = async function (nft_contract_address, token_id) {
+
+
+    return { token_uri: token_uri }
+}
+
+const abiErc721 = [
+    "function name() view returns (string)",
+    "function symbol() view returns (string)",
+    "function tokenURI(uint256 tokenId) external view returns (string memory)"
+];
+
+/**
+ * Lambda function wrapper for the service
+ */
+exports.handler = (event, context, callback) => {
+
+
+    handleURIRequest(event, (statusCode, data) => {
+        callback(null, {
+            statusCode: statusCode,
+
+            isBase64Encoded: false
+        })
+    })
+}
+
+// Should we want to run straight up vs. as a lambda
+module.exports.handleURIRequest = handleURIRequest
+module.exports.handleMatchRequest = handleMatchRequest
