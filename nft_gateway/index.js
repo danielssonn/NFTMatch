@@ -20,6 +20,11 @@ const options = {
     },
 };
 
+// Add these to your .env and delete from here
+// NFT_PORT_KEY = "6e1a58fb-550c-4dd4-92db-1508572bc92b"
+// NFT_PORT_URL = "api.nftport.xyz"
+// NFT_PORT_MATCH = "/v0/search?"
+
 
 
 /**
@@ -28,9 +33,6 @@ const options = {
  * @param {*} callback 
  */
 const handleURIRequest = async (input, callback) => {
-    console.log('input ', input)
-    console.log('Provider URL' + providerURL);
-    let responseCode = 200;
 
     const token_uri = await getTokenURI(input.contract_address, input.token_id)
     let responseBody = {
@@ -38,13 +40,11 @@ const handleURIRequest = async (input, callback) => {
         token_uri: token_uri
     };
 
-
     let response = {
-        statusCode: responseCode,
+        statusCode: 200,
         body: JSON.stringify(responseBody)
     };
-    callback(responseCode, response);
-
+    callback(200, response);
 
 }
 /**
@@ -74,20 +74,12 @@ const handleMatchRequest = async (input, callback) => {
 
     req.end();
 
-
-
 }
 
 const getTokenURI = async function (nft_contract_address, token_id) {
 
     const nftContract = new ethers.Contract(nft_contract_address, abiErc721, provider);
     const token_uri = await nftContract.tokenURI(token_id)
-    return { token_uri: token_uri }
-}
-
-const getMatchFromAPI = async function (nft_contract_address, token_id) {
-
-
     return { token_uri: token_uri }
 }
 
