@@ -21,7 +21,21 @@ contract NFTFinder is Ownable {
      * register NFTListing to be matched
      */
     function register(NFTListing memory listing) public {
-        registry.push(listing);
+        // TODO will need to de-dup this more elegantly ....
+        bool alreadyRegistered = false;
+        for (uint256 i = 0; i < registry.length; i++) {
+            if (
+                (registry[i].tknAddress == listing.tknAddress) &&
+                (registry[i].tknId == listing.tknId) &&
+                (registry[i].amount == listing.amount) &&
+                (registry[i].listingLength == listing.listingLength)
+            ) {
+                alreadyRegistered = true;
+            }
+        }
+        if (!alreadyRegistered) {
+            registry.push(listing);
+        }
     }
 
     /**
@@ -63,5 +77,13 @@ contract NFTFinder is Ownable {
             }
         }
         return NFTRecommendation(listing, address(0), 0);
+    }
+
+    function getMatchTknId(NFTListing memory listing)
+        public
+        view
+        returns (uint256)
+    {
+        return getMatch(listing).tknId;
     }
 }

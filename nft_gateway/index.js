@@ -1,29 +1,23 @@
 const ethers = require('ethers');
 const https = require('https');
-
 require('dotenv').config({ path: '../.env' })
 
-// blockchain provider config
-const providerURL = process.env.ALCHEMY_URL_MAINNET
-const provider = new ethers.providers.JsonRpcProvider(providerURL);
 
-// API provider config
-const options = {
-    hostname: process.env.NFT_PORT_URL,
-    port: 443,
-    path: process.env.NFT_PORT_MATCH,
-    method: 'GET',
-    accept: 'application/json',
-    query: { chain: 'ethereum' },
-    headers: {
-        Authorization: process.env.NFT_PORT_KEY
-    },
-};
+// Blockchain provider config
+const ALCHEMY_API_URL = process.env.ALCHEMY_GOERLI
+const PUBLIC_KEY = process.env.PUBLIC_KEY
+const PRIVATE_KEY = process.env.PRIVATE_KEY
 
-// Add these to your .env and delete from here
-// NFT_PORT_KEY = "6e1a58fb-550c-4dd4-92db-1508572bc92b"
-// NFT_PORT_URL = "api.nftport.xyz"
-// NFT_PORT_MATCH = "/v0/search?"
+//Web3
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
+const web3 = createAlchemyWeb3(ALCHEMY_API_URL)
+
+
+// Our Contracts
+const NFTFinderABI = require("./data/abi/NFTFinder.json")
+const NFTFinderContractAddress = process.env.NFTFINDER_CONTRACT_GOERLI
+
+
 
 
 /**
@@ -35,81 +29,62 @@ const handleNFTRegistration = async (input, callback) => {
 
     // find some good persistence provider tha will not lock us in on any given platform
     // define persistence model that lends itself well towards eventual distributed deployment
-    // persist the NFT there ...
-    callback(200, { message: "No registration provider implemented, go do it :-)!" });
+    // persist the NFT in our domain ...
+
+
+    // And lastly update Finder contract on chain
+    const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest")
+
+    const NFTFinderContract = new web3.eth.Contract(NFTFinderABI, NFTFinderContractAddress)
+    const tx = {
+        from: PUBLIC_KEY,
+        to: NFTFinderContractAddress,
+        nonce: nonce,
+        gas: 500000,
+        data: NFTFinderContract.methods.register({ tknAddress: '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c', tknId: 15, amount: 10, listingLength: 50 }).encodeABI(),
+    }
+
+    await signAndSend(tx);
+    callback(200, { tx: tx });
 }
 
-
-
 /**
- * Retrieve the token URI
+ * We found some! Let's update the Finder contract on chain.
  * @param {*} input 
  * @param {*} callback 
  */
-const handleURIRequest = async (input, callback) => {
+const handleNFTMatch = async (input, callback) => {
 
-    const token_uri = await getTokenURI(input.contract_address, input.token_id)
-    let responseBody = {
-        message: "Retrieved",
-        token_uri: token_uri
-    };
+    // pretend we found a matching NFT like this
+    const matchingCollection = '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c';
+    const matchingID = 16;
 
-    let response = {
-        statusCode: 200,
-        body: JSON.stringify(responseBody)
-    };
-    callback(200, response);
+    //for a listing like this (retrieve it from domain)
+    const listingToMatch = { tknAddress: '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c', tknId: 15, amount: 10, listingLength: 50 }
 
-}
-/**
- * Retrieve via API search
- * @param {*} input 
- * @param {*} callback 
- */
-const handleMatchRequest = async (input, callback) => {
+    // all that is left id to update the on-chain finder contract, making the match available to transact with in smart contracts
+    const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest")
 
-    options.path = options.path + 'chain=ethereum&text=' + input.text + '&' + input.chain + '&filter_by_contract_address=' + input.contract_address;
-    console.log(options.path);
-    const req = https.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`);
-        let data;
-        res.on('data', d => {
-            data = data + d
+    const NFTFinderContract = new web3.eth.Contract(NFTFinderABI, NFTFinderContractAddress)
+    const tx = {
+        from: PUBLIC_KEY,
+        to: NFTFinderContractAddress,
+        nonce: nonce,
+        gas: 500000,
+        data: NFTFinderContract.methods.updateMatch(listingToMatch, matchingCollection, matchingID).encodeABI(),
+    }
 
-        });
-        res.on('end', function () {
-            callback(200, data);
-        });
-    });
-
-    req.on('error', error => {
-        console.log('ERROR', error);
-    });
-
-    req.end();
-
+    await signAndSend(tx);
+    callback(200, { tx: tx });
 }
 
-const getTokenURI = async function (nft_contract_address, token_id) {
 
-    const nftContract = new ethers.Contract(nft_contract_address, abiErc721, provider);
-    const token_uri = await nftContract.tokenURI(token_id)
-    return { token_uri: token_uri }
+async function signAndSend(tx) {
+
+    const signed = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
+    const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
+    console.log(receipt);
 }
-
-const abiErc721 = [
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function tokenURI(uint256 tokenId) external view returns (string memory)"
-];
-
-const updateFinderContract = async function (nft_contract_address, token_id) {
-
-    const finderContract = new ethers.Contract(finder_contract_address, abiFinderContract, provider);
-    await finderContract.updateMatch({ tknAddress: nft_contract_address, tknId: 15, amount: 1, listingLength: 1 }, nft_contract_address, token_id);
-}
-
-const abiFinderContract = []
 
 /**
  * Lambda function wrapper for the service
@@ -117,7 +92,7 @@ const abiFinderContract = []
 exports.handler = (event, context, callback) => {
 
 
-    handleURIRequest(event, (statusCode, data) => {
+    handleNFTRegistration(event, (statusCode, data) => {
         callback(null, {
             statusCode: statusCode,
 
@@ -126,7 +101,5 @@ exports.handler = (event, context, callback) => {
     })
 }
 
-// Should we want to run straight up vs. as a lambda
-module.exports.handleURIRequest = handleURIRequest
-module.exports.handleMatchRequest = handleMatchRequest
 module.exports.handleNFTRegistration = handleNFTRegistration
+module.exports.handleNFTMatch = handleNFTMatch
