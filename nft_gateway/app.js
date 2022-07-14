@@ -1,8 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const handleURIRequest = require('./index').handleURIRequest
-const handleMatchRequest = require('./index').handleMatchRequest
+const handleURIRequest = require('./proto').handleURIRequest
+const handleNFTSearch = require('./proto').handleNFTSearch
 const handleNFTRegistration = require('./index').handleNFTRegistration
+const handleNFTMatch = require('./index').handleNFTMatch
 
 
 
@@ -21,12 +22,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 /**
- * NFT registration gateway
+ * NFT registration gateway - Client submits NFT to register     
  */
 app.post('/register-nft', async (req, res) => {
     console.log('POST Data: ', req.body)
 
     handleNFTRegistration(req.body, (status, result) => {
+        console.log('Result: ', result)
+        res.status(status).json(result)
+    })
+})
+
+/**
+ * Helper to kick off push of recommendation back onto chain
+ */
+app.post('/find-matching-nft', async (req, res) => {
+    console.log('POST Data: ', req.body)
+
+    handleNFTMatch(req.body, (status, result) => {
         console.log('Result: ', result)
         res.status(status).json(result)
     })
@@ -49,10 +62,10 @@ app.post('/token-uri', async (req, res) => {
 /**
  * NFTPort API service that matches token
  */
-app.post('/api-match', async (req, res) => {
+app.post('/api-search', async (req, res) => {
     console.log('POST Data: ', req.body)
 
-    handleMatchRequest(req.body, (status, result) => {
+    handleNFTSearch(req.body, (status, result) => {
         console.log('Result: ', result)
         res.status(status).json(result)
     })
