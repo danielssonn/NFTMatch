@@ -1,0 +1,12 @@
+{"level":"info","message":"Opening Web Socket..."}
+{"level":"info","message":"Web Socket Opened..."}
+{"level":"info","message":">>> CONNECT\naccept-version:1.0,1.1,1.2\nheart-beat:10000,0\n\n"}
+{"level":"info","message":"Received data"}
+{"level":"info","message":"Connection closed to wss://api.covalenthq.com/v1/?key=ckey_b780cce192f14bf8bf37d7a5c7c"}
+{"level":"info","message":"STOMP: scheduling reconnection in 5000ms"}
+{"level":"info","message":"Opening Web Socket..."}
+{"level":"info","message":"Web Socket Opened..."}
+{"level":"info","message":">>> CONNECT\naccept-version:1.0,1.1,1.2\nheart-beat:10000,0\n\n"}
+{"level":"info","message":"Received data"}
+{"level":"info","message":"Connection closed to wss://api.covalenthq.com/v1/?key=ckey_b780cce192f14bf8bf37d7a5c7c"}
+{"level":"info","message":"STOMP: scheduling reconnection in 5000ms"}
