@@ -2,7 +2,8 @@ import { UUID } from '../../infrastructure/ddd/domain/value-objects/uuid.value-o
 import { Entity } from '../../infrastructure/ddd/domain/base-classes/entity.base';
 
 export interface NftProps {
-  itemId: string;
+  id: string;
+  metadata: { attributes: { trait_type: string; value: string }[] };
 }
 
 export class NftEntity extends Entity<NftProps> {
