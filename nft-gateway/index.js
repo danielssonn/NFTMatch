@@ -1,6 +1,9 @@
 const ethers = require('ethers');
 const https = require('https');
-require('dotenv').config({ path: '../.env' })
+const redis = require('redis');
+require('dotenv').config({ path: '../.env' });
+const nftSubscriber = require('../nft-subscriber');
+
 
 
 // Blockchain provider config
@@ -16,6 +19,41 @@ const web3 = createAlchemyWeb3(ALCHEMY_API_URL)
 // Our Contracts
 const NFTFinderABI = require("./data/abi/NFTFinder.json")
 const NFTFinderContractAddress = process.env.NFTFINDER_CONTRACT_GOERLI
+const NFTFINDER_CONTRACT = process.env.NFTFINDER_CONTRACT_GOERLI
+const NFTFINDER_CHAIN_ID = process.env.NFTFINDER_CHAIN_ID_GOERLI
+
+// REDIS Pub/Sub
+const publisher = redis.createClient({ url: 'redis://127.0.0.1:6379' });
+
+/**
+ * 
+ * System events and topics
+ *
+ */
+// PUBLISH when and new NFT contract is registered on the platform, subscribe to execute matching logic. Will publish an event every time a blockchain event is published (i.e. mint, transfer)
+const NFTRegistered = "NFTRegistered";
+// PUBLISH when new martch is created, subscribe to update contract on chain. 
+const NFTMatched = "NFTMatched";
+
+
+/**
+ * Gateway is a publisher of NFTRegistered and subscriber to NFTMatched
+ */
+async function start() {
+    await publisher.connect();
+    const client = redis.createClient();
+
+    const subscriber = client.duplicate();
+
+    await subscriber.connect();
+
+    await subscriber.subscribe(NFTMatched, (message) => {
+        nftMatch(message)
+    });
+}
+start();
+
+
 
 
 
@@ -31,6 +69,13 @@ const handleNFTRegistration = async (input, callback) => {
     // define persistence model that lends itself well towards eventual distributed deployment
     // persist the NFT in our domain ...
 
+    console.log("Registering on chainID " + NFTFINDER_CHAIN_ID + " address: " + input.contract_address);
+
+    // call blockchain subscriber module, hook to any events coming in for the contract registered
+    nftSubscriber.subscriber.subscribe("/v1/" + NFTFINDER_CHAIN_ID + "/events/address/" + input.contract_address + "/", function (message) {
+        console.log('Received Event: ', message.body);
+        publisher.publish(NFTRegistered, message.body);
+    })
 
     // And lastly update Finder contract on chain
     const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest")
@@ -41,7 +86,7 @@ const handleNFTRegistration = async (input, callback) => {
         to: NFTFinderContractAddress,
         nonce: nonce,
         gas: 500000,
-        data: NFTFinderContract.methods.register({ tknAddress: '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c', tknId: 15, amount: 10, listingLength: 50 }).encodeABI(),
+        data: NFTFinderContract.methods.register({ tknAddress: input.contract_address, tknId: input.tkn_id, amount: input.amount, listingLength: input.length }).encodeABI(),
     }
 
     await signAndSend(tx);
@@ -55,6 +100,11 @@ const handleNFTRegistration = async (input, callback) => {
  */
 const handleNFTMatch = async (input, callback) => {
 
+    nftMatch(input);
+    callback(200, { tx: tx });
+}
+
+const nftMatch = async (match) => {
     // pretend we found a matching NFT like this
     const matchingCollection = '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c';
     const matchingID = 16;
@@ -75,15 +125,15 @@ const handleNFTMatch = async (input, callback) => {
     }
 
     await signAndSend(tx);
-    callback(200, { tx: tx });
+
 }
+
 
 
 async function signAndSend(tx) {
 
     const signed = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
     const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
-    console.log(receipt);
 }
 
 /**

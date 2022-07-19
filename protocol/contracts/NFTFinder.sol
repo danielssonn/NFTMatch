@@ -79,11 +79,12 @@ contract NFTFinder is Ownable {
         return NFTRecommendation(listing, address(0), 0);
     }
 
-    function getMatchTknId(NFTListing memory listing)
-        public
-        view
-        returns (uint256)
-    {
-        return getMatch(listing).tknId;
+    /**
+     * Fire of an event that NFT Gateway can listen for using a subscriber
+     */
+    function sendEvent(string memory message) public {
+        emit finderEvent(msg.sender, message);
     }
+
+    event finderEvent(address _from, string message);
 }

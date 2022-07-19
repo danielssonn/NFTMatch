@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
  * NFT registration gateway - Client submits NFT to register     
  */
 app.post('/register-nft', async (req, res) => {
-    console.log('POST Data: ', req.body)
+
 
     handleNFTRegistration(req.body, (status, result) => {
         console.log('Result: ', result)
