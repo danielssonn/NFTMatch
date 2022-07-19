@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
     apiKey: ETHERSCAN_API_KEY,
   },
   abiExporter: {
-    path: '../nft_gateway/data/abi',
+    path: '../nft-gateway/data/abi',
     runOnCompile: true,
     clear: true,
     flat: true,

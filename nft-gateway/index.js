@@ -94,26 +94,37 @@ const handleNFTRegistration = async (input, callback) => {
 }
 
 /**
- * We found some! Let's update the Finder contract on chain.
+ * We found some! Let's update the Finder contract on chain. This is just a gateway helper for testing from Postman ...
  * @param {*} input 
  * @param {*} callback 
  */
 const handleNFTMatch = async (input, callback) => {
 
-    nftMatch(input);
+    const tx = await nftMatch({
+        source: {
+            contract_id: input.source_contract,
+            token_id: input.source_tknId
+        },
+        match: {
+            contract_id: input.match_contract,
+            token_id: input.match_tknId
+        }
+    });
     callback(200, { tx: tx });
 }
 
-const nftMatch = async (match) => {
+const nftMatch = async (event) => {
     // pretend we found a matching NFT like this
-    const matchingCollection = '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c';
-    const matchingID = 16;
+    const matchingCollection = event.match.contract_id;
+    const matchingID = event.match.token_id;
+
 
     //for a listing like this (retrieve it from domain)
-    const listingToMatch = { tknAddress: '0x39DC1f0B54913FF057AEccE87240FB28c1772C1c', tknId: 15, amount: 10, listingLength: 50 }
+    const listingToMatch = { tknAddress: event.source.contract_id, tknId: event.source.token_id, amount: 10, listingLength: 50 }
 
     // all that is left id to update the on-chain finder contract, making the match available to transact with in smart contracts
     const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest")
+
 
     const NFTFinderContract = new web3.eth.Contract(NFTFinderABI, NFTFinderContractAddress)
     const tx = {
@@ -125,6 +136,7 @@ const nftMatch = async (match) => {
     }
 
     await signAndSend(tx);
+    return tx;
 
 }
 
@@ -134,6 +146,7 @@ async function signAndSend(tx) {
 
     const signed = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
     const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
+    console.log(receipt);
 }
 
 /**

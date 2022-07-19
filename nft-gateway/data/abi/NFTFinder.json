@@ -19,6 +19,25 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "message",
+        "type": "string"
+      }
+    ],
+    "name": "finderEvent",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "components": [
@@ -93,47 +112,6 @@
         "internalType": "struct NFTRecommendation",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "tknAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "tknId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "listingLength",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct NFTListing",
-        "name": "listing",
-        "type": "tuple"
-      }
-    ],
-    "name": "getMatchTknId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -241,6 +219,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "message",
+        "type": "string"
+      }
+    ],
+    "name": "sendEvent",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
