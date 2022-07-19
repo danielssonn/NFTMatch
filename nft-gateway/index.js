@@ -18,8 +18,12 @@ const web3 = createAlchemyWeb3(ALCHEMY_API_URL)
 
 // Our Contracts
 const NFTFinderABI = require("./data/abi/NFTFinder.json")
+
+// update .env and delete from here
+// NFTFINDER_CONTRACT_GOERLI = "0x3E0227eF090364Eb0823e25eF99832c4174448af"
+// NFTFINDER_CHAIN_ID_GOERLI = "5"
+
 const NFTFinderContractAddress = process.env.NFTFINDER_CONTRACT_GOERLI
-const NFTFINDER_CONTRACT = process.env.NFTFINDER_CONTRACT_GOERLI
 const NFTFINDER_CHAIN_ID = process.env.NFTFINDER_CHAIN_ID_GOERLI
 
 // REDIS Pub/Sub

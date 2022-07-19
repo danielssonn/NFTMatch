@@ -2,6 +2,11 @@ let Stomp = require('stompjs');
 require('dotenv').config({ path: '../.env' })
 
 
+
+// update .env and delete from here
+// COVALENT_KEY = "ckey_b780cce192f14bf8bf37d7a5c7c"
+// COVALENT_URL = "wss://api.covalenthq.com/v1/?key="
+
 const COVALENT_KEY = process.env.COVALENT_KEY
 const COVALENT_URL = process.env.COVALENT_URL
 const covalentURL = COVALENT_URL + COVALENT_KEY;
