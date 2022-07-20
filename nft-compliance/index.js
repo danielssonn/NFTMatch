@@ -42,7 +42,7 @@ const checkAuthenticity = async (input) => {
 
     let data = {
         "chain": "polygon",
-        "contract_address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bb1",
+        "contract_address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193b2",
         "token_id": "9999",
         "page_number": 1,
         "page_size": 50,
@@ -62,6 +62,7 @@ const checkAuthenticity = async (input) => {
             let resJSON;
             try {
                 resJSON = JSON.parse(data);
+                console.log(resJSON)
 
             } catch (e) {
                 authenticityCheck.checked = true;
@@ -84,9 +85,12 @@ const checkAuthenticity = async (input) => {
             }
             else if (resJSON.response == "NOK") {
                 checkAuthenticity.checked = true;
+                checkAuthenticity.status = resJSON.error.code;
                 console.log(checkAuthenticity);
                 return checkAuthenticity;
             } else {
+                checkAuthenticity.checked = true;
+                checkAuthenticity.status = 'error';
                 return checkAuthenticity;
             }
 
@@ -94,7 +98,9 @@ const checkAuthenticity = async (input) => {
     });
 
     req.on('error', error => {
-        return { status: -1 };
+        checkAuthenticity.checked = true;
+        checkAuthenticity.status = 'error';
+        return checkAuthenticity;
     });
     req.write(dataEncoded);
     req.end();
