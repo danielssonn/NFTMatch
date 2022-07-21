@@ -3,6 +3,8 @@ require('dotenv').config({ path: '../.env' })
 
 
 // NFTPort API provider for authenticity checks
+// https://web.postman.co/workspace/My-Workspace~d9c594f2-9116-4d44-8b8d-703ae130be05/request/229235-dd66e671-35cb-475f-baa4-067224f36dfb
+
 const options = {
     hostname: process.env.NFT_PORT_URL,
     port: 443,
@@ -16,6 +18,23 @@ const options = {
 };
 
 
+
+
+/**
+ * Check if submitted NFT is authentic by running it against NFTPort API
+ * @param {*} input 
+ * some test data that can be passed into checkAuthenticity:
+   let input = {
+        "chain": "polygon",
+        "contract_address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+        "token_id": "9999",
+        "page_number": 1,
+        "page_size": 50,
+        "threshold": 0.9
+    }
+ */
+
+
 const authenticityCheck = {
     checked: false,
     status: false,
@@ -24,30 +43,19 @@ const authenticityCheck = {
 
 }
 
-/**
- * Check if submitted NFT is authentic by running it against NFTPort API
- * @param {*} input 
- */
 const checkAuthenticity = async (input) => {
 
 
-    // let data = {
-    //     "chain": input.chain,
-    //     "contract_address": input.contract_address,
-    //     "token_id": input.token_id,
-    //     "page_numbe": 1,
-    //     "page_size": 50,
-    //     "threshold": 0.9
-    // }
-
     let data = {
-        "chain": "polygon",
-        "contract_address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193b2",
-        "token_id": "9999",
+        "chain": input.chain,
+        "contract_address": input.contract_address,
+        "token_id": input.token_id,
         "page_number": 1,
         "page_size": 50,
         "threshold": 0.9
     }
+
+
     let dataEncoded = JSON.stringify(data);
 
     const req = https.request(options, res => {

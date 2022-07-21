@@ -10,6 +10,7 @@ struct NFTListing {
     uint256 tknId;
     uint256 amount;
     uint256 listingLength;
+    string compliance;
 }
 
 struct NFTCollateral {

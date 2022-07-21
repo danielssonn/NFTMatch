@@ -3,6 +3,8 @@ const https = require('https');
 const redis = require('redis');
 require('dotenv').config({ path: '../.env' });
 const nftSubscriber = require('../nft-subscriber');
+const nftCompliance = require('../nft-compliance');
+
 
 
 
@@ -81,6 +83,21 @@ const handleNFTRegistration = async (input, callback) => {
         publisher.publish(NFTRegistered, message.body);
     })
 
+
+    // Do some complaince checks on the registered NFT
+    complianceCheck = nftCompliance.checkAuthenticity(
+        {
+            "chain": process.env.COMPLIANCE_CHECK_CHAIN,
+            "contract_address": input.contract_address,
+            "token_id": input.tkn_id,
+            "page_number": 1,
+            "page_size": 50,
+            "threshold": 0.9
+        }
+    );
+    console.log(complianceCheck);
+
+
     // And lastly update Finder contract on chain
     const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest")
 
@@ -90,7 +107,7 @@ const handleNFTRegistration = async (input, callback) => {
         to: NFTFinderContractAddress,
         nonce: nonce,
         gas: 500000,
-        data: NFTFinderContract.methods.register({ tknAddress: input.contract_address, tknId: input.tkn_id, amount: input.amount, listingLength: input.length }).encodeABI(),
+        data: NFTFinderContract.methods.register({ tknAddress: input.contract_address, tknId: input.tkn_id, amount: input.amount, listingLength: input.length, compliance: complianceCheck.status }).encodeABI(),
     }
 
     await signAndSend(tx);

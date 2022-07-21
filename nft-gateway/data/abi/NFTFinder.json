@@ -60,6 +60,11 @@
             "internalType": "uint256",
             "name": "listingLength",
             "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "compliance",
+            "type": "string"
           }
         ],
         "internalType": "struct NFTListing",
@@ -92,6 +97,11 @@
                 "internalType": "uint256",
                 "name": "listingLength",
                 "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "compliance",
+                "type": "string"
               }
             ],
             "internalType": "struct NFTListing",
@@ -161,6 +171,11 @@
             "internalType": "uint256",
             "name": "listingLength",
             "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "compliance",
+            "type": "string"
           }
         ],
         "internalType": "struct NFTListing",
@@ -204,6 +219,11 @@
             "internalType": "uint256",
             "name": "listingLength",
             "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "compliance",
+            "type": "string"
           }
         ],
         "internalType": "struct NFTListing",
@@ -272,6 +292,11 @@
             "internalType": "uint256",
             "name": "listingLength",
             "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "compliance",
+            "type": "string"
           }
         ],
         "internalType": "struct NFTListing",
